@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/home/fvasquez/.config/herd-lite/bin/php",
+            "args": [
+                "/home/fvasquez/Code/Laravel12/eventss/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
