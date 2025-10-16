@@ -25,7 +25,8 @@ class HouseForm
                             ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
                         TextInput::make('slug')
-                            ->name('slugsss')
+                            ->name('slug')
+                            ->label('Slug')
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),

@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Http\Middleware\HasRole;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use Filament\Actions\Action;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -12,14 +13,13 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -30,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->profile()
-            ->login()
+            // ->login()
             ->colors([
                 'primary' => Color::Violet,
                 'secondary' => Color::Emerald,
@@ -66,6 +66,19 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
                 HasRole::class,
+            ])
+            ->userMenuItems([
+                'logout' => fn(Action $action) => $action
+                    ->label('Log out')
+                    ->url(route('logout'), shouldOpenInNewTab: false)
+                    ->requiresConfirmation()
+                    ->action(function () {
+                        auth()->guard()->logout();
+                        session()->invalidate();
+                        session()->regenerateToken();
+
+                        return redirect('/');
+                    }),
             ]);
     }
 }
