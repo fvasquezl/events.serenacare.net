@@ -34,9 +34,23 @@ class Event extends Model
         return $this->belongsTo(House::class);
     }
 
+    /**
+     * Determina si el evento está activo en el momento actual.
+     * Compara fecha, hora y minutos completos.
+     */
     public function isCurrentlyActive(): bool
     {
-        return $this->is_active
-            && now()->between($this->start_datetime, $this->end_datetime);
+        if (! $this->is_active) {
+            return false;
+        }
+
+        if (! $this->start_datetime || ! $this->end_datetime) {
+            return false;
+        }
+
+        $now = now();
+
+        return $now->greaterThanOrEqualTo($this->start_datetime)
+            && $now->lessThanOrEqualTo($this->end_datetime);
     }
 }
