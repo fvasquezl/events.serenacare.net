@@ -31,10 +31,8 @@ class EventCreated implements ShouldBroadcast
     {
         return [
             'id' => $this->event->id,
-            'house_id' => $this->event->house_id,
             'title' => $this->event->title,
             'description' => $this->event->description,
-            'image_path' => $this->event->image_path,
             'start_datetime' => $this->event->start_datetime,
             'end_datetime' => $this->event->end_datetime,
             'is_active' => $this->event->is_active,

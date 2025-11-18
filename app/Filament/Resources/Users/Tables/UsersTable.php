@@ -24,6 +24,10 @@ class UsersTable
                     ->sortable()
                     ->copyable()
                     ->copyMessage('Email copied to clipboard'),
+                TextColumn::make('roles.name')
+                    ->label('Role')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('house.name')
                     ->label('Assigned House')
                     ->searchable()

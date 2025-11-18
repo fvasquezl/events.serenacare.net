@@ -12,12 +12,12 @@ class ActiveEventsWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
-    public function getHousesWithEventsProperty(): Collection
-    {
-        return House::with(['events' => function ($query) {
-            $query->where('is_active', true)
-                ->where('start_datetime', '<=', now())
-                ->where('end_datetime', '>=', now());
-        }])->get();
-    }
+    // public function getHousesWithEventsProperty(): Collection
+    // {
+    //     // return House::with(['events' => function ($query) {
+    //     //     $query->where('is_active', true)
+    //     //         ->where('start_datetime', '<=', now())
+    //     //         ->where('end_datetime', '>=', now());
+    //     // }])->get();
+    // }
 }

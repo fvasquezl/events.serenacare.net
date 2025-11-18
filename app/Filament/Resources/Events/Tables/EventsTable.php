@@ -18,22 +18,11 @@ class EventsTable
     {
         return $table
             ->columns([
-                TextColumn::make('house.name')
-                    ->label('House')
-                    ->searchable()
-                    ->sortable(),
 
                 TextColumn::make('title')
                     ->searchable()
                     ->sortable()
                     ->limit(30),
-
-                ImageColumn::make('image_path')
-                    ->label('Image')
-                    ->disk('public')
-                    ->visibility('public')
-                    ->square()
-                    ->toggleable(),
 
                 TextColumn::make('start_datetime')
                     ->label('Start')
@@ -61,10 +50,10 @@ class EventsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('house')
-                    ->relationship('house', 'name')
-                    ->searchable()
-                    ->preload(),
+                // SelectFilter::make('house')
+                //     ->relationship('house', 'name')
+                //     ->searchable()
+                //     ->preload(),
 
                 TernaryFilter::make('is_active')
                     ->label('Active Status')

@@ -86,8 +86,8 @@
                     <span class="block mt-2">Serena Care</span>
                 </h1>
                 <p class="mb-8 text-xl text-white/90 opacity-0 fade-in-up delay-100">
-                    Sistema profesional de gestión de eventos para casas de huéspedes.
-                    Muestra tus eventos en tiempo real con elegancia y simplicidad.
+                    Sistema profesional de gestión de eventos para residencia de adultos mayores.
+                    Muestra los eventos en tiempo real con elegancia y simplicidad.
                 </p>
                 <div class="flex flex-col justify-center gap-4 opacity-0 sm:flex-row fade-in-up delay-200">
                     @auth

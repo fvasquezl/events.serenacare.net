@@ -37,12 +37,6 @@ class HousesTable
                     ->square()
                     ->toggleable(),
 
-                TextColumn::make('events_count')
-                    ->counts('events')
-                    ->label('Events')
-                    ->badge()
-                    ->sortable(),
-
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use ParagonIE\Sodium\Core\Curve25519\H;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Event extends Model
 {
@@ -33,6 +35,13 @@ class Event extends Model
     {
         return $this->belongsTo(House::class);
     }
+
+
+     public function images(): HasMany
+    {
+        return $this->hasMany(Image::class);
+    }
+
 
     /**
      * Determina si el evento está activo en el momento actual.

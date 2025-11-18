@@ -1,17 +1,17 @@
 <x-filament-widgets::widget>
     <x-filament::section>
-        @php
+        {{-- @php
             $totalActiveEvents = $this->housesWithEvents->sum(fn($house) => $house->events->count());
-        @endphp
+        @endphp --}}
 
         <div class="space-y-4">
             <div class="text-center">
-                <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                {{-- <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100">
                     {{ $totalActiveEvents }} {{ $totalActiveEvents === 1 ? 'Evento Activo' : 'Eventos Activos' }}
-                </h3>
+                </h3> --}}
             </div>
 
-            @if ($totalActiveEvents > 0)
+            {{-- @if ($totalActiveEvents > 0)
                 <div class="space-y-2">
                     @foreach ($this->housesWithEvents as $house)
                         @if ($house->events->isNotEmpty())
@@ -30,11 +30,11 @@
                         @endif
                     @endforeach
                 </div>
-            @else
-                <div class="py-4 text-center">
+            @else --}}
+                {{-- <div class="py-4 text-center">
                     <p class="text-sm text-gray-500 dark:text-gray-400">No hay eventos activos</p>
                 </div>
-            @endif
+            @endif --}}
         </div>
     </x-filament::section>
 </x-filament-widgets::widget>

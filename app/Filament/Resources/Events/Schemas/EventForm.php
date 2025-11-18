@@ -2,13 +2,14 @@
 
 namespace App\Filament\Resources\Events\Schemas;
 
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
-use Filament\Schemas\Components\Section;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class EventForm
@@ -17,16 +18,9 @@ class EventForm
     {
         return $schema
             ->components([
-                Section::make()
+                Section::make('Event Information')
                     ->columns(2)
                     ->components([
-                        Select::make('house_id')
-                            ->relationship('house', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->columnSpanFull(),
-
                         TextInput::make('title')
                             ->required()
                             ->maxLength(255)
@@ -34,21 +28,6 @@ class EventForm
 
                         Textarea::make('description')
                             ->rows(3)
-                            ->columnSpanFull(),
-
-                        FileUpload::make('image_path')
-                            ->label('Event Image')
-                            ->image()
-                            ->imageEditor()
-                            ->disk('public')
-                            ->directory('events')
-                            ->visibility('public')
-                            ->required()
-                            ->maxSize(10240)
-                            ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/webp'])
-                            ->downloadable()
-                            ->openable()
-                            ->previewable()
                             ->columnSpanFull(),
 
                         DateTimePicker::make('start_datetime')
@@ -68,6 +47,53 @@ class EventForm
                             ->label('Active')
                             ->default(true)
                             ->columnSpanFull(),
+                    ]),
+
+                Section::make('Imagenes para el Evento')
+                    ->description('Agregue imágenes relacionadas con este evento en todas las casas (Excepto la casa seleccionada), y stablecer un desfase de tiempo para su visualización durante el evento.')
+                    ->components([
+                        Repeater::make('images')
+                            ->relationship()
+                            ->schema([
+                                FileUpload::make('image_path')
+                                    ->label('Image')
+                                    ->image()
+                                    ->imageEditor()
+                                    ->disk('public')
+                                    ->directory('events')
+                                    ->visibility('public')
+                                    ->required()
+                                    ->maxSize(10240)
+                                    ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg', 'image/webp'])
+                                    ->downloadable()
+                                    ->openable()
+                                    ->previewable()
+                                    ->columnSpanFull(),
+
+                                Select::make('house_id')
+                                    ->label('Except House')
+                                    ->relationship('house', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->helperText('Select which house this image belongs to'),
+
+                                TextInput::make('time_offset')
+                                    ->label('Time Offset (seconds)')
+                                    ->numeric()
+                                    ->default(0.1)
+                                    ->required()
+                                    ->helperText('Time in seconds when this image should be displayed')
+                                    ->minValue(0.1)
+                                    ->step(0.1),
+                            ])
+                            ->columns(2)
+                            ->orderColumn('order')
+                            ->reorderable()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['house_id'] ? 'Image for House ID: '.$state['house_id'] : 'New Image')
+                            ->addActionLabel('Add Image')
+                            ->defaultItems(0)
+                            ->cloneable(),
                     ]),
             ]);
     }
