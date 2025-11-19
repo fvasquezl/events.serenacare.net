@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\House;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,10 +20,8 @@ class EventFactory extends Factory
         $endDate = fake()->dateTimeBetween($startDate, '+60 days');
 
         return [
-            'house_id' => House::factory(),
             'title' => fake()->sentence(3),
             'description' => fake()->paragraph(),
-            'image_path' => null,
             'start_datetime' => $startDate,
             'end_datetime' => $endDate,
             'is_active' => fake()->boolean(80),

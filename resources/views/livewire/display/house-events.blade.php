@@ -13,8 +13,6 @@ new class extends Component
 
     public ?House $house = null;
 
-    public $activeEvent = null;
-
     public function mount(string $slug): void
     {
         $this->slug = $slug;
@@ -23,52 +21,13 @@ new class extends Component
 
     public function loadHouseData(): void
     {
-        $this->house = House::where('slug', $this->slug)->with('events')->firstOrFail();
-        $this->activeEvent = $this->house->active_event;
-    }
-
-    public function getListeners(): array
-    {
-        if (! $this->house) {
-            return [];
-        }
-
-        return [
-            "echo:house.{$this->house->id},.event.created" => 'refreshEvent',
-        ];
-    }
-
-    public function refreshEvent(): void
-    {
-        $this->loadHouseData();
+        $this->house = House::where('slug', $this->slug)->firstOrFail();
     }
 }; ?>
 
-<div x-data="{ refreshInterval: null }" x-init="
-    // Auto-refresh every 60 seconds as fallback
-    refreshInterval = setInterval(() => {
-        $wire.loadHouseData();
-    }, 60000);
+<div class="relative w-screen h-screen flex items-center justify-center">
 
-    // Cleanup on component destroy
-    $cleanup = () => clearInterval(refreshInterval);
-" class="relative w-screen h-screen flex items-center justify-center">
-
-    @if($activeEvent && $activeEvent->image_path)
-        {{-- Active Event Image --}}
-        <div class="absolute inset-0">
-            <img
-                src="{{ Storage::url($activeEvent->image_path) }}"
-                alt="{{ $activeEvent->title }}"
-                class="w-full h-full object-cover"
-            />
-            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-8">
-                <h1 class="text-4xl md:text-6xl font-bold text-white drop-shadow-lg">
-                    {{ $activeEvent->title }}
-                </h1>
-            </div>
-        </div>
-    @elseif($house->default_image_path)
+    @if($house->default_image_path)
         {{-- Default House Image --}}
         <div class="absolute inset-0">
             <img
@@ -91,7 +50,6 @@ new class extends Component
 
 @script
 <script>
-    // Optional: Add additional WebSocket connection handling here
-    console.log('House Events Display initialized for house ID:', @js($house?->id));
+    console.log('House Display initialized for house:', @js($house?->name));
 </script>
 @endscript

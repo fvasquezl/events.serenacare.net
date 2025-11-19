@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('order')->default(0);
             $table->string('image_path')->nullable();
-            $table->float('time_offset')->default(1.0); // in seconds
+            $table->float('time_offset')->default(1); // in seconds
             $table->foreignId('house_id')->nullable()->constrained()->cascadeOnDelete();
             $table->foreignId('event_id')->constrained()->cascadeOnDelete();
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class House extends Model
@@ -17,22 +18,16 @@ class House extends Model
         'default_image_path',
     ];
 
-    public function events(): HasMany
-    {
-        return $this->hasMany(Event::class);
-    }
-
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
     }
 
-    public function getActiveEventAttribute(): ?Event
+    /**
+     * Imágenes de las que esta casa está excluida (no se mostrarán en esta casa).
+     */
+    public function excludedFromImages(): BelongsToMany
     {
-        return $this->events()
-            ->where('is_active', true)
-            ->where('start_datetime', '<=', now())
-            ->where('end_datetime', '>=', now())
-            ->first();
+        return $this->belongsToMany(Image::class, 'image_house');
     }
 }

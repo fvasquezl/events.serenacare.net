@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            // if (Schema::hasColumn('events', 'house_id')) {
-            //     $table->dropForeign(['house_id']);
-            //     $table->dropColumn('house_id');
-            // }
+            if (Schema::hasColumn('events', 'house_id')) {
+                $table->dropForeign(['house_id']);
+                $table->dropColumn('house_id');
+            }
 
             if (Schema::hasColumn('events', 'image_path')) {
                 $table->dropColumn('image_path');
@@ -29,7 +29,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('events', function (Blueprint $table) {
-            // $table->foreignId('house_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('house_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('image_path')->nullable();
         });
     }

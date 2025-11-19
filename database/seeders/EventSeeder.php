@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Event;
-use App\Models\House;
 use Illuminate\Database\Seeder;
 
 class EventSeeder extends Seeder
@@ -13,13 +12,7 @@ class EventSeeder extends Seeder
      */
     public function run(): void
     {
-        $houses = House::all();
-
-        foreach ($houses as $house) {
-            // Create 2-3 events for each house
-            Event::factory()->count(rand(2, 3))->create([
-                'house_id' => $house->id,
-            ]);
-        }
+        // Crear eventos globales (no asociados a casas específicas)
+        Event::factory()->count(5)->create();
     }
 }
