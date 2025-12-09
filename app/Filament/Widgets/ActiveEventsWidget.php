@@ -2,7 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\House;
+use App\Models\Event;
 use Filament\Widgets\Widget;
 use Illuminate\Support\Collection;
 
@@ -12,12 +12,10 @@ class ActiveEventsWidget extends Widget
 
     protected int|string|array $columnSpan = 'full';
 
-    // public function getHousesWithEventsProperty(): Collection
-    // {
-    //     // return House::with(['events' => function ($query) {
-    //     //     $query->where('is_active', true)
-    //     //         ->where('start_datetime', '<=', now())
-    //     //         ->where('end_datetime', '>=', now());
-    //     // }])->get();
-    // }
+    public function getActiveEventsProperty(): Collection
+    {
+        return Event::currentlyActive()
+            ->orderBy('start_datetime')
+            ->get();
+    }
 }
