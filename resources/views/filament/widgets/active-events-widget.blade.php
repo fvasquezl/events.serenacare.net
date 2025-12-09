@@ -9,17 +9,28 @@
             Eventos Activos
         </x-slot>
 
-        @if ($totalActiveEvents > 0)
-            <x-slot name="headerEnd">
-                <span class="inline-flex items-center gap-1.5 rounded-full bg-success-100 dark:bg-success-500/20 px-2.5 py-1 text-xs font-medium text-success-700 dark:text-success-300">
-                    <span class="relative flex h-2 w-2">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-500 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-success-500"></span>
+        <x-slot name="afterHeader">
+            <div class="flex items-center gap-3">
+                @if ($totalActiveEvents > 0)
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-success-100 dark:bg-success-500/20 px-2.5 py-1 text-xs font-medium text-success-700 dark:text-success-300">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-500 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-success-500"></span>
+                        </span>
+                        {{ $totalActiveEvents }} en vivo
                     </span>
-                    {{ $totalActiveEvents }} en vivo
-                </span>
-            </x-slot>
-        @endif
+                @endif
+                <x-filament::button
+                    href="{{ route('dashboard') }}"
+                    tag="a"
+                    size="sm"
+                    icon="heroicon-m-arrow-top-right-on-square"
+                    icon-position="after"
+                >
+                    Ir al Dashboard
+                </x-filament::button>
+            </div>
+        </x-slot>
 
         @if ($totalActiveEvents > 0)
             <div class="fi-ta-content relative divide-y divide-gray-200 overflow-x-auto dark:divide-white/10 dark:border-t-white/10 rounded-lg border border-gray-200 dark:border-white/10">
