@@ -14,7 +14,9 @@ class Image extends Model
     use HasFactory;
 
     protected $fillable = [
+        'type',
         'image_path',
+        'youtube_url',
         'time_offset',
         'order',
         'event_id',
@@ -28,14 +30,55 @@ class Image extends Model
         ];
     }
 
+    public function isVideo(): bool
+    {
+        return $this->type === 'video';
+    }
+
+    public function isImage(): bool
+    {
+        return $this->type === 'image';
+    }
+
+    public function getYoutubeVideoId(): ?string
+    {
+        if (! $this->youtube_url) {
+            return null;
+        }
+
+        $patterns = [
+            '/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/',
+            '/^([a-zA-Z0-9_-]{11})$/',
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (preg_match($pattern, $this->youtube_url, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        return null;
+    }
+
+    public function getYoutubeEmbedUrl(): ?string
+    {
+        $videoId = $this->getYoutubeVideoId();
+
+        if (! $videoId) {
+            return null;
+        }
+
+        return "https://www.youtube.com/embed/{$videoId}?enablejsapi=1&autoplay=1&mute=1&controls=0&rel=0&showinfo=0&modestbranding=1";
+    }
+
     /**
      * Boot the model.
      */
     protected static function booted(): void
     {
-        // Eliminar la imagen anterior cuando se actualiza el image_path
+        // Eliminar la imagen anterior cuando se actualiza el image_path (solo para imágenes)
         static::updating(function (Image $image) {
-            if ($image->isDirty('image_path')) {
+            if ($image->isImage() && $image->isDirty('image_path')) {
                 $oldImagePath = $image->getOriginal('image_path');
                 if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
                     Storage::disk('public')->delete($oldImagePath);
@@ -43,9 +86,9 @@ class Image extends Model
             }
         });
 
-        // Eliminar el archivo físico del storage cuando se elimina el registro
+        // Eliminar el archivo físico del storage cuando se elimina el registro (solo para imágenes)
         static::deleting(function (Image $image) {
-            if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+            if ($image->isImage() && $image->image_path && Storage::disk('public')->exists($image->image_path)) {
                 Storage::disk('public')->delete($image->image_path);
             }
         });
