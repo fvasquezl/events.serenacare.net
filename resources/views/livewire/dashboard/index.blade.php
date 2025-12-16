@@ -114,7 +114,7 @@ new class extends Component {
                                 {{-- Video container - siempre presente para videos --}}
                                 <div x-show="item.type === 'video'"
                                      :id="slideshowId + '-container-' + index"
-                                     class="w-full h-full">
+                                     class="w-full h-full overflow-hidden rounded-xl [&>iframe]:scale-[1.02] [&>div]:scale-[1.02]">
                                 </div>
                             </div>
                         </template>
@@ -165,7 +165,7 @@ new class extends Component {
                             {{-- Video container - siempre presente para videos --}}
                             <div x-show="item.type === 'video'"
                                  :id="slideshowId + '-container-' + index"
-                                 class="w-full h-full">
+                                 class="w-full h-full overflow-hidden rounded-xl [&>iframe]:scale-[1.02] [&>div]:scale-[1.02]">
                             </div>
                         </div>
                     </template>
