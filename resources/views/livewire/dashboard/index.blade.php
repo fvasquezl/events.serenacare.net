@@ -147,7 +147,7 @@ new class extends Component {
                 $description = $this->getEventDescription();
             @endphp
 
-            <div class="relative w-full aspect-[16/9] overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-black mb-4"
+            <div class="relative w-screen h-screen overflow-hidden bg-black"
                  wire:ignore
                  x-data="mediaSlideshow(@js($images), 'yt-user-{{ $house->id }}')"
                  @refresh-slideshow.window="currentIndex = 0; scheduleNext()">
@@ -162,38 +162,49 @@ new class extends Component {
                                  :src="item.url"
                                  :alt="'{{ $title ?? $house->name }}'"
                                  class="w-full h-full object-cover">
-                            {{-- Video container - siempre presente para videos --}}
+                            {{-- Video container --}}
                             <div x-show="item.type === 'video'"
                                  :id="slideshowId + '-container-' + index"
-                                 class="w-full h-full overflow-hidden rounded-xl [&>iframe]:scale-[1.02] [&>div]:scale-[1.02]">
+                                 class="w-full h-full overflow-hidden [&>iframe]:scale-[1.02] [&>div]:scale-[1.02]">
                             </div>
                         </div>
                     </template>
 
-                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-6 z-10">
-                        <h2 class="text-3xl font-bold text-white mb-2">{{ $title ?? $house->name }}</h2>
+                    {{-- Barras de navegación --}}
+                    <button x-show="media.length > 1"
+                            @click="prevMedia()"
+                            class="absolute left-0 top-0 h-full w-24 z-20 cursor-pointer bg-transparent hover:bg-white/10 transition-colors duration-300 flex items-center justify-start pl-4 group"
+                            aria-label="Anterior">
+                        <svg class="w-8 h-8 text-white/0 group-hover:text-white/70 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button x-show="media.length > 1"
+                            @click="nextMedia()"
+                            class="absolute right-0 top-0 h-full w-24 z-20 cursor-pointer bg-transparent hover:bg-white/10 transition-colors duration-300 flex items-center justify-end pr-4 group"
+                            aria-label="Siguiente">
+                        <svg class="w-8 h-8 text-white/0 group-hover:text-white/70 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-8 z-10">
+                        <h2 class="text-4xl font-bold text-white mb-2">{{ $title ?? $house->name }}</h2>
                         @if($description)
-                            <p class="text-base text-white/90">{{ $description }}</p>
+                            <p class="text-lg text-white/90">{{ $description }}</p>
                         @endif
                     </div>
                 @else
                     {{-- Fallback sin medios --}}
                     <div class="flex items-center justify-center w-full h-full">
                         <div class="text-center text-white">
-                            <h2 class="text-4xl font-bold mb-4">{{ $house->name }}</h2>
-                            <p class="text-xl text-white/70">{{ $house->location }}</p>
-                            <p class="text-lg text-white/60 mt-2">Sin evento activo</p>
+                            <h2 class="text-6xl font-bold mb-4">{{ $house->name }}</h2>
+                            <p class="text-2xl text-white/70">{{ $house->location }}</p>
+                            <p class="text-xl text-white/60 mt-2">Sin evento activo</p>
                         </div>
                     </div>
                 @endif
             </div>
         @endforeach
     @endif
-
-    <div class="flex justify-between items-center text-sm text-neutral-600 dark:text-neutral-400">
-        <p>Actualizando cada 60 segundos</p>
-        <flux:button wire:click="refresh" variant="ghost" size="sm">
-            Actualizar ahora
-        </flux:button>
-    </div>
 </div>

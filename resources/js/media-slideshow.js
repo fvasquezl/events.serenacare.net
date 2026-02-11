@@ -96,6 +96,7 @@ export default function mediaSlideshow(mediaItems, slideshowId) {
                     },
                     events: {
                         onReady: function(event) {
+                            event.target.setPlaybackQuality('hd1080');
                             event.target.playVideo();
                         },
                         onStateChange: function(event) {
@@ -142,6 +143,11 @@ export default function mediaSlideshow(mediaItems, slideshowId) {
         nextMedia() {
             clearTimeout(this.timer);
             this.currentIndex = (this.currentIndex + 1) % this.media.length;
+        },
+
+        prevMedia() {
+            clearTimeout(this.timer);
+            this.currentIndex = (this.currentIndex - 1 + this.media.length) % this.media.length;
         },
 
         destroy() {

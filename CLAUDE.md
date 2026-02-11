@@ -4,166 +4,127 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Laravel 12 application for managing events across different houses. The application uses Filament 4 for admin panel management, Livewire Volt for frontend interactivity, and Flux UI for components. It includes:
+Laravel 12 application for managing events displayed across multiple houses (locations). Uses Filament 4 for admin, Livewire Volt for frontend interactivity, and Flux UI (free edition) for components. The UI is in Spanish.
 
-- **House Management**: Houses are locations that can host events
-- **Event Management**: Events belong to houses and have start/end times, images, and active status
-- **User Management**: Users can belong to houses and have role-based permissions (via Spatie Permissions & Filament Shield)
-- **Public Display**: Public-facing display pages for showing active events per house
+- **Houses**: Locations that display events, identified by slug for public URLs
+- **Events**: Global, time-bound events with images/videos. Active status + datetime window determines visibility
+- **Images**: Media items (images or YouTube videos) belonging to events, with per-house exclusion via `image_house` pivot table
+- **Users**: Assigned to a house, role-based access via Spatie Permissions & Filament Shield
+- **Public Display**: Full-screen display pages at `/display/{slug}` showing active event media per house
 
 ## Common Commands
 
-### Development
 ```bash
-# Start all development services (server, queue, logs, vite)
+# Start all dev services (server, queue, logs, vite)
 composer run dev
-
-# Start just the Laravel server
-php artisan serve
-
-# Start Vite for frontend assets
-npm run dev
 
 # Build frontend assets for production
 npm run build
-```
 
-### Testing
-```bash
 # Run all tests
 php artisan test
 
-# Run a specific test file
+# Run specific test file or filter by name
 php artisan test tests/Feature/DashboardTest.php
-
-# Filter tests by name
 php artisan test --filter=testName
-```
 
-### Code Quality
-```bash
-# Format code with Pint (always run before finalizing changes)
+# Format code (always run before finalizing changes)
 vendor/bin/pint --dirty
 
-# Run Pint without test flag
-vendor/bin/pint
-```
-
-### Database
-```bash
-# Run migrations
-php artisan migrate
-
-# Fresh migrations with seeding
+# Fresh database with seed data
 php artisan migrate:fresh --seed
 ```
 
-## Architecture & Structure
+## Architecture & Key Concepts
 
-### Models & Relationships
+### Event-Image-House Relationship (Important)
 
-- **House**: Central entity representing a location
-  - `hasMany` Events
-  - `hasMany` Users
-  - Has `slug` for public URL access
-  - Has computed `active_event` attribute for currently active event
+Events are **global** — they are not tied to a single house. Instead, each Image belongs to an Event, and the `image_house` **pivot table tracks exclusions** (not inclusions). An image is visible at all houses *except* those in its exclusion list. This allows one event to display media selectively per house.
 
-- **Event**: Time-bound events belonging to houses
-  - `belongsTo` House
-  - Has image uploads stored in `storage/app/public/events`
-  - Method `isCurrentlyActive()` checks if event is active and within time window
+- `Event` → `hasMany(Image)`
+- `Image` → `belongsToMany(House)` via `image_house` (exclusion pivot)
+- `House` → `belongsToMany(Image)` via `image_house` (excluded images)
+- `Image::scopeVisibleForHouse($houseId)` — filters by inverse exclusion
+- `Event::getImagesForHouse($houseId)` — returns filtered media
+- `Event::scopeCurrentlyActive()` — filters active events within time windows
+- `NoEventOverlap` rule (`app/Rules/`) prevents overlapping active events
 
-- **User**: Authentication with house assignment
-  - `belongsTo` House
-  - Uses Fortify for authentication (including 2FA)
-  - Uses Spatie Permissions for role management
-  - Method `initials()` generates user initials from name
+### Models
+
+- **House** (`app/Models/House.php`): name, slug, location, default_image_path
+- **Event** (`app/Models/Event.php`): title, description, start_datetime, end_datetime, is_active
+- **Image** (`app/Models/Image.php`): type ('image'|'video'), image_path, youtube_url, time_offset, order. Auto-deletes old files from storage on update/delete via booted lifecycle hooks
+- **User** (`app/Models/User.php`): belongsTo House, uses Fortify 2FA, Spatie HasRoles
 
 ### Filament 4 Resource Organization
 
-Filament resources use a **component-based architecture** with separate classes for different concerns:
+Resources use component-based architecture with separate classes:
 
 ```
 app/Filament/Resources/{ResourceName}/
 ├── Pages/           # List, Create, Edit, View pages
 ├── Schemas/         # Form and Infolist schemas (reusable)
 ├── Tables/          # Table configuration
-└── {ResourceName}Resource.php  # Main resource class
+└── {ResourceName}Resource.php
 ```
 
-**Example**: `UserResource` delegates to:
-- `UserForm::configure()` for form schema
-- `UserInfolist::configure()` for view schema
-- `UsersTable::configure()` for table configuration
+Each resource delegates to `*Form::configure()`, `*Table::configure()`, etc. Follow this pattern for new resources.
 
-This pattern promotes reusability and separation of concerns. Follow this pattern for new resources.
+Key Filament v4 specifics:
+- Layout components (`Grid`, `Section`, `Fieldset`) live in `Filament\Schemas\Components`
+- All actions extend `Filament\Actions\Action` (no separate table action classes)
+- Icons use `Filament\Support\Icons\Heroicon` enum
+- File visibility is `private` by default — this project explicitly sets `public`
+- Use `relationship()` on Select/Checkbox components for relationships
 
-### Livewire & Volt
+### Livewire Volt Components
 
-- Volt components use **class-based** syntax extending `Livewire\Volt\Component`
-- Authentication views are Volt components in `resources/views/livewire/auth/`
-- Settings pages are Volt components in `resources/views/livewire/settings/`
-- Use `php artisan make:volt [name]` to create new Volt components
+Volt components use **class-based** syntax extending `Livewire\Volt\Component`:
+- Auth views: `resources/views/livewire/auth/`
+- Settings: `resources/views/livewire/settings/`
+- Dashboard: `resources/views/livewire/dashboard/index.blade.php` — polls every 60s, admin sees all houses, regular users see only their assigned house
+- Public display: `resources/views/livewire/display/house-events.blade.php`
 
 ### Frontend Stack
 
-- **Flux UI** (free edition) for UI components - check available components before creating custom ones
-- **Tailwind CSS v4** - uses `@import "tailwindcss"` syntax, not `@tailwind` directives
+- **Flux UI** (free) — available components: avatar, badge, brand, breadcrumbs, button, callout, checkbox, dropdown, field, heading, icon, input, modal, navbar, profile, radio, select, separator, switch, text, textarea, tooltip
+- **Tailwind CSS v4** — uses `@import "tailwindcss"` syntax, not `@tailwind` directives
+- **Alpine.js** `mediaSlideshow` component (`resources/js/media-slideshow.js`) — handles image/video carousel with YouTube IFrame API integration, auto-advances based on `time_offset`
 - Dark mode support using `dark:` classes
-- Vite for asset bundling
 
-### Routes & Public Display
+### Routes
 
-- Admin panel at `/admin` (Filament)
-- Public display at `/display/{slug}` - shows active event for a house by slug
-- Authentication routes handled by Laravel Fortify
-- Settings routes for user profile, password, 2FA, appearance
+- `/admin` — Filament admin panel
+- `/display/{slug}` — Public display (unauthenticated), uses minimal full-screen layout
+- `/dashboard` — Authenticated user dashboard
+- `/settings/*` — Profile, password, 2FA, appearance (Volt components)
+- Auth routes in `routes/auth.php` via Fortify
 
-### Validation
+### Auth & Authorization
 
-- Use Form Request classes for validation (not inline controller validation)
-- Check sibling Form Requests to match array vs string-based validation conventions
+- **Fortify** for authentication (including 2FA)
+- **Spatie Permission** + **Filament Shield** for role management
+- `HasRole` middleware (`app/Http/Middleware/`) checks for super_admin or any role
+- `Gate::before` in AppServiceProvider grants super_admin bypass on all checks
+- Policies (`app/Policies/`) delegate to Spatie permission checks
 
-### Testing Strategy
+### Broadcasting
 
-- Tests use **Pest** (not PHPUnit syntax)
-- Browser tests should go in `tests/Browser/` (Pest v4 browser testing available)
-- Feature tests in `tests/Feature/`, Unit tests in `tests/Unit/`
-- Use factories for model creation in tests
-- Run minimal tests with filters during development: `php artisan test --filter=testName`
+- `EventCreated` broadcast event fires on Event create/update via `EventObserver`
+- Default broadcast driver is `log` (development); Laravel Reverb available but not configured
 
-## File Upload Configuration
+## Code Conventions
 
-Events use file uploads with these settings:
-- Disk: `public`
-- Directory: `events`
-- Visibility: `public`
-- Max size: 10MB
-- Accepted types: PNG, JPEG, JPG, WebP
+- **PHP 8.4**: Use constructor property promotion, explicit return types, type hints
+- **Casts**: Use `casts()` method on models, not `$casts` property
+- **Database**: SQLite by default. When modifying columns in migrations, include ALL attributes or they will be dropped
+- **Validation**: Use Form Request classes, not inline controller validation
+- **Tests**: Pest (not PHPUnit syntax). Feature tests in `tests/Feature/`, unit in `tests/Unit/`, browser in `tests/Browser/`
+- **Comments**: Prefer PHPDoc blocks over inline comments
+- **Enums**: Keys should be TitleCase
+- **Control structures**: Always use curly braces, even for single-line bodies
+- **File uploads**: public disk, `events` directory, max 10MB, PNG/JPEG/JPG/WebP
 
-## Database
+## Seeder Data
 
-- Uses **SQLite** by default
-- Uses `casts()` method on models (not `$casts` property) - follow existing conventions
-- When modifying columns in migrations, include ALL attributes or they will be dropped
-
-## Important Patterns
-
-### Filament Schema Components
-- Layout components moved to `Filament\Schemas\Components` in v4 (Grid, Section, Fieldset, etc.)
-- All actions extend `Filament\Actions\Action` (no separate table action classes)
-- Use `relationship()` method on Select/Checkbox components when working with relationships
-
-### Heroicons
-- Use `Filament\Support\Icons\Heroicon` enum for icons (see `UserResource.php`)
-
-### Two-Factor Authentication
-- Managed through Fortify
-- UI in `resources/views/livewire/settings/two-factor.blade.php`
-- Recovery codes view in subdirectory
-
-## Role & Permissions
-
-- Uses **Spatie Laravel Permission** package
-- Uses **Filament Shield** for admin panel role management
-- Shield resources available at `/admin/shield/roles`
+Default admin users created by DatabaseSeeder: Faustino Vasquez, Miguel Torres, Carolina Molina — all with `super_admin` role. ShieldSeeder sets up permissions.
