@@ -99,13 +99,14 @@ new class extends Component {
                 <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 bg-black"
                      wire:ignore
                      x-data="mediaSlideshow(@js($images), 'yt-admin-{{ $house->id }}')"
-                     @refresh-slideshow.window="currentIndex = 0; scheduleNext()">
+                     @refresh-slideshow.window="forceRefresh()">
 
                     @if(count($images) > 0)
                         {{-- Slideshow de medios --}}
                         <template x-for="(item, index) in media" :key="index">
-                            <div class="absolute inset-0 transition-opacity duration-500"
-                                 :class="{ 'opacity-100 z-[1]': index === currentIndex, 'opacity-0 z-0': index !== currentIndex }">
+                            <div class="absolute inset-0"
+                                 :data-slide="index"
+                                 :class="index === 0 ? 'slide-enter' : 'slide-idle'">
                                 {{-- Imagen --}}
                                 <img x-show="item.type === 'image'"
                                      :src="item.url"
@@ -162,13 +163,14 @@ new class extends Component {
             <div class="relative w-screen h-screen overflow-hidden bg-black"
                  wire:ignore
                  x-data="mediaSlideshow(@js($images), 'yt-user-{{ $house->id }}')"
-                 @refresh-slideshow.window="currentIndex = 0; scheduleNext()">
+                 @refresh-slideshow.window="forceRefresh()">
 
                 @if(count($images) > 0)
                     {{-- Slideshow de medios --}}
                     <template x-for="(item, index) in media" :key="index">
-                        <div class="absolute inset-0 transition-opacity duration-500"
-                             :class="{ 'opacity-100 z-[1]': index === currentIndex, 'opacity-0 z-0': index !== currentIndex }">
+                        <div class="absolute inset-0"
+                             :data-slide="index"
+                             :class="index === 0 ? 'slide-enter' : 'slide-idle'">
                             {{-- Imagen --}}
                             <img x-show="item.type === 'image'"
                                  :src="item.url"
